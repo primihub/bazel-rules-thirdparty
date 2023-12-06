@@ -1,5 +1,13 @@
 load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
 
+config_setting(
+  name = "macos",
+  constraint_values = [
+    "@platforms//os:macos",
+  ],
+  visibility = ["//visibility:public"],
+)
+
 filegroup(
     name = "src",
     srcs = glob(["**"]),
@@ -13,26 +21,31 @@ cmake(
       "CMAKE_INSTALL_LIBDIR": "lib",
       "MULTI": "PTHREAD",
       "WSIZE": "64",
+      "STLIB": "off",
     },
     "@platforms//cpu:x86_64": {
       "CMAKE_INSTALL_LIBDIR": "lib",
       "MULTI": "PTHREAD",
       "WSIZE": "64",
+      "STLIB": "off",
     },
     "@platforms//cpu:i386": {
       "CMAKE_INSTALL_LIBDIR": "lib",
       "MULTI": "PTHREAD",
       "WSIZE": "32",
+      "STLIB": "off",
     },
     "@platforms//cpu:arm": {
       "CMAKE_INSTALL_LIBDIR": "lib",
       "MULTI": "PTHREAD",
       "WSIZE": "32",
+      "STLIB": "off",
     },
     "//conditions:default": {
       "CMAKE_INSTALL_LIBDIR": "lib",
       "MULTI": "PTHREAD",
       "WSIZE": "32",
+      "STLIB": "off",
     },
   }),
   build_args = [
@@ -41,9 +54,13 @@ cmake(
   linkopts = [
     "-lpthread",
   ],
-  #includes = ["include"],
+  includes = ["include"],
   lib_source = ":src",
   #out_include_dir = "include/relic",
-  out_static_libs = ["librelic_s.a"],
+  #out_static_libs = ["librelic_s.a"],
+  out_shared_libs = select({
+    ":macos": ["librelic.dylib"],
+    "//conditions:default": ["librelic.so"]
+  }),
   visibility = ["//visibility:public"],
 )
